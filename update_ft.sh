@@ -11,8 +11,16 @@ html_content=$(curl -s "$url")
 new_ft_value=$(echo "$html_content" | grep -oP '<span[^>]*id="currentFt"[^>]*>\K[^<]+')
 
 if [ -n "$new_ft_value" ]; then
-  jq --arg newFt "$new_ft_value" '.ft = ($newFt | tonumber)' "$json_file" > tmp.json && mv tmp.json "$json_file"
-  echo "The value of 'ft' in $json_file has been updated to: $new_ft_value"
+  current_ft_value=$(jq -r '.ft' "$json_file")
+  if [ "$current_ft_value" != "$new_ft_value" ]; then
+    jq --arg newFt "$new_ft_value" '.ft = ($newFt | tonumber)' "$json_file" > tmp.json && mv tmp.json "$json_file"
+    echo "The value of 'ft' in $json_file has been updated to: $new_ft_value"
+    exit 0
+  else
+    echo "The value of 'ft' has not changed."
+    exit 1
+  fi
 else
   echo "Failed to parse the value from the HTML."
+  exit 1
 fi
