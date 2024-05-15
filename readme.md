@@ -6,35 +6,35 @@ sensor:
   - platform: rest
     name: "p150"
     resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
-    value_template: "{{ value_json.grid_150 }}"
+    value_template: "{{ value_json.grid_150 | round(4) }}"
     unit_of_measurement: "THB"
     scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
 
   - platform: rest
     name: "p250"
     resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
-    value_template: "{{ value_json.grid_250 }}"
+    value_template: "{{ value_json.grid_250 | round(4) }}"
     unit_of_measurement: "THB"
     scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
 
   - platform: rest
     name: "p400"
     resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
-    value_template: "{{ value_json.grid_400 }}"
+    value_template: "{{ value_json.grid_400 | round(4) }}"
     unit_of_measurement: "THB"
     scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
 
   - platform: rest
     name: "ft"
     resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
-    value_template: "{{ value_json.ft }}"
+    value_template: "{{ value_json.ft | round(4) }}"
     unit_of_measurement: "THB/kWh"
     scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
 
   - platform: rest
     name: "service"
     resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
-    value_template: "{{ value_json.service }}"
+    value_template: "{{ value_json.service | round(4) }}"
     unit_of_measurement: "THB"
     scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
 
@@ -59,7 +59,7 @@ sensor:
             {% set cost = (150 * rate_150) + (250 * rate_250) + ((usage - 400) * rate_400) %}
           {% endif %}
           
-          {{ (cost + (usage * ft)) * 1.07 + service_charge }}
+          {{ ((cost + (usage * ft)) * 1.07 + service_charge) | round(4) }}
 
 utility_meter:
   monthly_energy:
