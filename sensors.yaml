@@ -1,0 +1,95 @@
+sensor:
+  - platform: rest
+    name: "p150"
+    resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
+    value_template: "{{ value_json.grid_150 | round(4) }}"
+    unit_of_measurement: "THB"
+    scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
+
+  - platform: rest
+    name: "p250"
+    resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
+    value_template: "{{ value_json.grid_250 | round(4) }}"
+    unit_of_measurement: "THB"
+    scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
+
+  - platform: rest
+    name: "p400"
+    resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
+    value_template: "{{ value_json.grid_400 | round(4) }}"
+    unit_of_measurement: "THB"
+    scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
+
+  - platform: rest
+    name: "ft"
+    resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
+    value_template: "{{ value_json.ft | round(4) }}"
+    unit_of_measurement: "THB/kWh"
+    scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
+
+  - platform: rest
+    name: "service"
+    resource: "https://raw.githubusercontent.com/iaunn/thailand-electric-rate/master/thailand_electric_rate.json"
+    value_template: "{{ value_json.service | round(4) }}"
+    unit_of_measurement: "THB"
+    scan_interval: 3600  # ปรับตามความเหมาะสม (หน่วยเป็นวินาที)
+
+  - platform: template
+    sensors:
+      electricity_base_cost:
+        friendly_name: "Electricity Base Cost"
+        unit_of_measurement: "THB"
+        value_template: >
+          {% set usage = states('sensor.monthly_energy_used') | float %}
+          {% set rate_150 = states('sensor.p150') | float %}
+          {% set rate_250 = states('sensor.p250') | float %}
+          {% set rate_400 = states('sensor.p400') | float %}
+          
+          {% if usage <= 150 %}
+            {{ (usage * rate_150) | round(4) }}
+          {% elif usage <= 400 %}
+            {{ ((150 * rate_150) + ((usage - 150) * rate_250)) | round(4) }}
+          {% else %}
+            {{ ((150 * rate_150) + (250 * rate_250) + ((usage - 400) * rate_400)) | round(4) }}
+          {% endif %}
+
+      electricity_cost_with_service:
+        friendly_name: "Electricity Cost with Service"
+        unit_of_measurement: "THB"
+        value_template: >
+          {% set base_cost = states('sensor.electricity_base_cost') | float %}
+          {% set service_charge = states('sensor.service') | float %}
+          {{ (base_cost + service_charge) | round(4) }}
+
+      ft_cost:
+        friendly_name: "FT Cost"
+        unit_of_measurement: "THB"
+        value_template: >
+          {% set usage = states('sensor.montly_energy_used') | float %}
+          {% set ft = states('sensor.ft') | float %}
+          {{ (usage * ft) | round(4) }}
+
+      total_cost_without_vat:
+        friendly_name: "Total Cost without VAT"
+        unit_of_measurement: "THB"
+        value_template: >
+          {% set cost_with_service = states('sensor.electricity_cost_with_service') | float %}
+          {% set ft_cost = states('sensor.ft_cost') | float %}
+          {{ (cost_with_service + ft_cost) | round(4) }}
+
+      vat_cost:
+        friendly_name: "VAT Cost"
+        unit_of_measurement: "THB"
+        value_template: >
+          {% set total_cost_without_vat = states('sensor.total_cost_without_vat') | float %}
+          {{ (total_cost_without_vat * 0.07) | round(4) }}
+
+      total_cost_with_vat:
+        friendly_name: "Total Cost with VAT"
+        unit_of_measurement: "THB"
+        value_template: >
+          {% set total_cost_without_vat = states('sensor.total_cost_without_vat') | float %}
+          {% set vat_cost = states('sensor.vat_cost') | float %}
+          {{ (total_cost_without_vat + vat_cost) | round(4) }}
+
+
