@@ -92,4 +92,3 @@ sensor:
           {% set vat_cost = states('sensor.vat_cost') | float %}
           {{ (total_cost_without_vat + vat_cost) | round(4) }}
 
-
