@@ -30,7 +30,6 @@ jobs:
           exit 0
         else
           echo "Changes detected"
-          exit 1
         fi
       id: check-changes
 
