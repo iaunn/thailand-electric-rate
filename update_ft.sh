@@ -7,7 +7,8 @@ json_file="thailand_electric_rate.json"
 # Fetch the HTML content
 html_content=$(curl -s "$url")
 
-# Parse the number from the span with id "currentFt"
+# Parse the number from the span with id "current-ft"
+# Using a slightly more robust grep/sed if needed, but grep -oP is fine for Ubuntu
 new_ft_value=$(echo "$html_content" | grep -oP '<span[^>]*id="current-ft"[^>]*>\K[^<]+')
 
 if [ -n "$new_ft_value" ]; then
@@ -15,11 +16,10 @@ if [ -n "$new_ft_value" ]; then
   if [ "$current_ft_value" != "$new_ft_value" ]; then
     jq --arg newFt "$new_ft_value" '.ft = ($newFt | tonumber)' "$json_file" > tmp.json && mv tmp.json "$json_file"
     echo "The value of 'ft' in $json_file has been updated to: $new_ft_value"
-    exit 0
   else
     echo "The value of 'ft' has not changed."
-    exit 1
   fi
+  exit 0
 else
   echo "Failed to parse the value from the HTML."
   exit 1
