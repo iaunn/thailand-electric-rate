@@ -70,3 +70,4 @@ utility_meter:
 - https://www.pea.co.th/our-services/tariff
 - https://www.pea.co.th/our-services/tariff/ft
 - https://www.pea.co.th/sites/default/files/documents/tariff/Electricity_Tariff_MAY_2023.pdf
+- https://eservice.pea.co.th/EstimateBill/index.html
